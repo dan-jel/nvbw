@@ -2,18 +2,21 @@ import googlemaps
 import xlsxwriter
 import os
 
+#   Ordner erstellen (Linux exclusive)
+os.system("mkdir xml")
 
+#   Googlemaps API Authentifizierung
 apikeyfile=open("apikey.txt","r")
 apikey=apikeyfile.read()
 gmaps=googlemaps.Client(key=apikey)
 
-
+#   Funktion die den Dateinamen entgegennimmt und einen darauf angepassten wget befehlt schreibt und ausführt (Linux exclusive)
 def wget(name):
     a="""wget --post-file=./xml/""" + name + """.xml --header="Content-Type: text/xml" -O ./xml/out-""" + name + ".xml https://efa-bw.de/trias"""
     os.system(a)
     return
 
-
+#   Nimmt einen Ortnamen entgegen, macht eine API abfrage und gibt Ort, Lat- und Longkoordinate zurück
 def maps(ort):
     url=str(gmaps.geocode(ort))
     anfang=url.find("location")+19
@@ -24,7 +27,7 @@ def maps(ort):
     long=url[anfang:ende]
     return([ort,lat,long])
 
-
+#   Die Funktion, die aus Anfangs und Endkoordinaten die XML Datei schreibt für die TRIAS API
 def xml(name,slat,slong,zlat,zlong):
     name="./xml/" + name + ".xml"
     file = open(name, "w")
@@ -58,7 +61,7 @@ def xml(name,slat,slong,zlat,zlong):
     file.close()
     return
 
-
+#   überbleibsel aus der Zeit wo ich die Ergebnisse in eine .xlsx geschrieben habe
 def kordsout(alle):
     kordsbook = xlsxwriter.Workbook("lat-long-out.xlsx")
     sheetk= kordsbook.add_worksheet()
@@ -85,7 +88,7 @@ def kordsout(alle):
     os.system("start out.xlsx")
     return
 
-
+#   Verteilerfunktion für Routenauskunft
 def routsout(start,ziel):
     name=start[0] + "-" + ziel[0]
     slat=start[1]
@@ -96,7 +99,7 @@ def routsout(start,ziel):
     wget(name)
     return
 
-
+#   altes Zeug für Koordinaten ausgabe in Excel Datei
 def kords(infos):
     sammeln=[]
     for i in infos:
@@ -105,19 +108,18 @@ def kords(infos):
     kordsout(sammeln)
     return
 
-
+#   Funktion, die alle Routen nacheinander bearbeitet 
 def routs(routen):
-    commands=[]
     for route in routen:
         route=route.split("-")
         start=route[0]
         ziel=route[1]
         start=maps(start)
         ziel=maps(ziel)
-        com=routsout(start,ziel)
+        routsout(start,ziel)
     return
 
-
+#   Eingabezeugs für Koordinatenabfrage
 def kordsgui():
     print("Bitte gib die gewünschten Städte mit einem Komma getrennt ein:")
     citys=str(input("--> "))
@@ -125,7 +127,7 @@ def kordsgui():
     kords(citys)
     return
 
-
+#   Eingabe von Routen
 def routsgui():
     print("Bitte gib die Routen wie folge ein: Start-Ziel,Start-Ziel,Start-Ziel ")
     routen=input("--> ")
@@ -133,7 +135,7 @@ def routsgui():
     routs(routen)
     return
 
-
+#   Infos & Eingabe von gewünschter Funktion und Werten
 print("Möchtest du Orte in Koordinaten umrechnen (1) oder eine Route berechnen (2) ?")
 
 z=False
